@@ -62,6 +62,41 @@ function updateDays() {
     }
 }
 
+//function to inspect custom check box on message change
+function autoCheckCustom() {
+    var messageBox = document.getElementById("customText");
+    //textarea has message, check the box
+    if (messageBox.value !== "" && messageBox.value !== messageBox.placeholder) {
+                document.getElementById("custom").checked = "checked";
+    }
+    //textarea has no message, uncheck the box
+    else {
+        document.getElementById("custom").checked = "";
+    }
+    
+}
+
+//function to copy billing to delivery address
+function copyBillingAddress() {
+    var billingInputElements = document.querySelectorAll("#billingAddress input");
+    var deliveryInputElements = document.querySelectorAll("#deliveryAddress input");
+    
+    // duplicate adress - checkbox is checked - copy
+    if (document.getElementById("sameAddr").checked) {
+        for (var i=0; i < billingInputElements.length; i++) {
+            deliveryInputElements[i + 1].value = billingInputElements[i].value;
+        }
+        document.querySelector("#deliveryAddress select").value = document.querySelector("#billingAddress select").value;
+    }
+    // duplicate adress - checkboxnot checked - erase
+        else {
+            for (var i=0; i< billingInputElements.length; i++) {
+                deliveryInputElements[i + 1].value = billingInputElements[i].value;
+        }
+        document.querySelector("#deliveryAddress select").selectedIndex = -1;               
+        }
+}
+
 // function that sets up page on load event 
 function setUpPage() {
     removeSelectDefaults();
@@ -87,6 +122,22 @@ function createEventListeners() {
         } else if (deliveryYear.attachEvent) {
             deliveryYear.attachEvents("onchange", updateDays);
         }   
+    
+     //if the message box changes
+     var messageBox = document.getElementById("customText");
+        if (messageBox.addEventListener) {
+            messageBox.addEventListener("change", autoCheckCustom, false);
+        } else if (messageBox.attachEvent) {
+            messageBox.attachEvents("onchange", autoCheckCustom);
+        }   
+    
+      var same = document.getElementById("sameAddr");
+        if (same.addEventListener) {
+            same.addEventListener("change", copyBillingAddress, false);
+        } else if (same.attachEvent) {
+            same.attachEvents("onchange", copyBillingAddress);
+        }   
+    
 }
     
 //page load event handlers
@@ -96,4 +147,5 @@ if (window.addEventListener) {
     window.attachEvents("onload", setUpPage);
      
 }
+
 
