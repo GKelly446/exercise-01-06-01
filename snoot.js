@@ -12,6 +12,8 @@ snoot.js
 var twentyNine = document.createDocumentFragment();
 var thirty = document.createDocumentFragment();
 var thirtyOne = document.createDocumentFragment();
+var formValidity = true;
+
 
 // function to remove select list defaults
 function removeSelectDefaults() {
@@ -20,6 +22,7 @@ function removeSelectDefaults() {
         emptyBoxes[i].selectedIndex = -1;
     }
 }
+
 
 // function to set up document fragments for days of the month
 function setUpDays() {
@@ -81,14 +84,14 @@ function copyBillingAddress() {
     var billingInputElements = document.querySelectorAll("#billingAddress input");
     var deliveryInputElements = document.querySelectorAll("#deliveryAddress input");
     
-    // duplicate adress - checkbox is checked - copy
+    // duplicate address - checkbox is checked - copy
     if (document.getElementById("sameAddr").checked) {
         for (var i=0; i < billingInputElements.length; i++) {
             deliveryInputElements[i + 1].value = billingInputElements[i].value;
         }
         document.querySelector("#deliveryAddress select").value = document.querySelector("#billingAddress select").value;
     }
-    // duplicate adress - checkboxnot checked - erase
+    // duplicate address - checkboxnot checked - erase
         else {
             for (var i=0; i< billingInputElements.length; i++) {
                 deliveryInputElements[i + 1].value = billingInputElements[i].value;
@@ -96,6 +99,91 @@ function copyBillingAddress() {
         document.querySelector("#deliveryAddress select").selectedIndex = -1;               
         }
 }
+
+// function to validate address - billing & delivery
+function validateAddress(fieldsetId) {
+    var inputElements = document.querySelectorAll("#" + fieldsetId + " input");
+    var errorDiv = document.querySelectorAll("#" + fieldsetId + " .errorMessage")[0];
+    var fieldsetValidity = true;
+    var elementCount = inputElements.length;
+    var currentElement;
+    
+    try {
+        // loop through input fields lookking for blanks
+        for (let i = 0; i < elementCount; i++) {
+            currentElement = inputElements[i];
+            // blanks
+            if (currentElement.value === "") {
+               // debugger;
+                currentElement.style.background = "rgb(255, 233, 233)";
+                fieldsetValidity = false; 
+            }
+            
+            // not blanks
+            
+            else {
+                currentElement.style.background = "white";
+            }
+        }
+        
+        //validate select list fieldsetId
+        currentElement = document.querySelectorAll("#" + fieldsetId + " select");
+        if (currentElement.selectedIndex === -1) {
+            currentElement.style.border = "1px solid red";
+            fieldsetValidity = false;
+        }
+        else {
+            currentElement.style.border = "";
+        }
+        
+        
+        // action for invalide fieldset
+
+        if (fieldsetValidity === false) {
+            if (fieldsetId === "billingAddress") {
+                throw "Please complete all Billing Address information."
+            } 
+            else {
+                throw "Please complete all Delivery Address information."
+            }
+        }
+    
+    }
+    catch (msg) {
+     errorDiv.style.display = "block";
+     errorDiv.innerHTML = msg;
+     formValidity = false;
+ }
+
+}
+
+
+// function to validate entire form
+function validateForm(evt) {
+    if (evt.preventDefault) {
+        evt.preventDefault();
+    }
+    else {
+        evt.returnValue = false;
+    }
+    formValidity = true;
+    
+    validateAddress("billingAddress");
+    validateAddress("deliveryAddress");
+    
+    if (formValidity === true) { //form is valid
+        document.getElementById("errorText").innerHTML = "";
+        document.getElementById("errorText").style.display = "none";
+        document.getElementsByTagName("form")[0].submit();
+
+    }
+    else {
+        document.getElementById("errorText").innerHTML = "Please fix the indicated problems and then resubmit your order.";
+        document.getElementById("errorText").style.display = "block";
+        scroll(0,0);
+    }
+}
+
 
 // function that sets up page on load event 
 function setUpPage() {
@@ -136,6 +224,13 @@ function createEventListeners() {
             same.addEventListener("change", copyBillingAddress, false);
         } else if (same.attachEvent) {
             same.attachEvents("onchange", copyBillingAddress);
+        }   
+    
+    var form = document.getElementsByTagName("form")[0];
+        if (form.addEventListener) {
+            form.addEventListener("submit", validateForm, false);
+        } else if (form.attachEvent) {
+            form.attachEvents("onsubmit", validateForm);
         }   
     
 }
