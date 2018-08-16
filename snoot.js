@@ -7,6 +7,10 @@ snoot.js
 
 */
 
+//=====================================
+//GLOBAL VARIABLES/ SET UPS
+//=====================================
+
 "use strict";
 
 var twentyNine = document.createDocumentFragment();
@@ -100,7 +104,7 @@ function copyBillingAddress() {
         else {
             for (var i=0; i< billingInputElements.length; i++) {
                 deliveryInputElements[i + 1].value = billingInputElements[i].value;
-        }
+            }
         document.querySelector("#deliveryAddress select").selectedIndex = -1;               
         }
 }
@@ -201,6 +205,55 @@ function validateDeliveryDate() {
     
 }
 
+// function to validate create account
+function validateCreateAccount() {
+    var errorDiv = document.querySelectorAll("#createAccount" + " .errorMessage")[0];
+    var usernameElement = document.getElementById("username");
+    var pass1Element = document.getElementById("pass1");
+    var pass2Element = document.getElementById("pass2");
+    var invColor = "rgb(255,233,233)";
+    var passwordMismatch = false;
+    var fieldsetValidity = true;
+    usernameElement.style.background = "white";
+    pass1Element.style.background = "white";
+    pass2Element.style.background = "white";
+    errorDiv.style.display = "none";
+    errorDiv.innerHTML = "";
+    
+    try {
+        // one or more fields has data
+        if (usernameElement.value !== "" && pass1Element.value !== "" && pass2Element.value !== "") { 
+            // verify passwords match
+            if (pass1Element.value !== pass2Element.value) { 
+                fieldsetValidity = false;
+                passwordMismatch = true;
+                throw "Passwords entered do not match, please re-enter."
+            }
+        }
+        else if (usernameElement.value == "" && pass1Element.value === "" && pass2Element.value === "") {
+                fieldsetValidity = true;
+                passwordMismatch = false;
+        }
+        else {
+            fieldsetValidity = false;
+            throw "Please enter all fields to Create Account.";
+        }
+    }
+    catch(msg) {
+        errorDiv.style.display = "block";
+        errorDiv.innerHTML = msg;
+        pass1Element.style.background = invColor;
+        pass2Element.style.background = invColor;
+        formValidity = false;
+        if (passwordMismatch) {
+            usernameElement.style.background = "white";
+        }
+        else {
+            usernameElement.style.background = invColor;
+        }
+    }
+}
+
 // function to validate custom message
 function validateMessage() {
     var msgBox = document.getElementById("customText");
@@ -222,9 +275,7 @@ function validateMessage() {
         errorDiv.innerHTML = msg;
         msgBox.style.background = "rgb(255, 233, 233)";
         formValidity = false;
-
     }
-    
 }
 
 // function to validate payment
@@ -238,8 +289,9 @@ function validatePayment() {
     var cvvElement = document.getElementById("cvv");
     var cards = document.getElementsByName("PaymentType");
     var currentElement;
+    
     try {  
-        // validate radio button one must be on
+        // validate radio buttchon one must be on
         if (!cards[0].checked && !cards[1].checked && !cards[2].checked && !cards[3].checked) {
             for(var i = 0; i < cards.length; i++) {
                 cards[i].style.outline = "1px solid red";
@@ -296,6 +348,11 @@ function validatePayment() {
     
 }
 
+//==========================================
+// VALIDATE ENTIRE FORM (Calling Inv. Func)
+//==========================================
+
+
 // function to validate entire form
 function validateForm(evt) {
     if (evt.preventDefault) {
@@ -311,6 +368,7 @@ function validateForm(evt) {
     validateDeliveryDate();
     validatePayment();
     validateMessage();
+    validateCreateAccount();
     
     if (formValidity === true) { //form is valid
         document.getElementById("errorText").innerHTML = "";
@@ -332,6 +390,11 @@ function setUpPage() {
     setUpDays();
     createEventListeners();
 }
+
+//============================================
+// EVENT LISTENERS AND HANDLERS
+//============================================
+
 
 // function to create our event listeners 
 
@@ -383,5 +446,3 @@ if (window.addEventListener) {
     window.attachEvents("onload", setUpPage);
      
 }
-
-
